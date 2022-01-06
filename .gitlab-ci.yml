@@ -1,12 +1,49 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
-- test
+  - preparation
+  - testing
+
+image: lorisleiva/laravel-docker:8.0
+
+cache:
+  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+
+composer:
+  stage: preparation
+  script:
+    - php -v
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 days
+    when: always
+  cache:
+    paths:
+      - vendor/
+
+phpcs:
+  stage: preparation
+  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  script:
+    - phpcs
+
+unitTests:
+  stage: testing
+  dependencies:
+    - composer
+  script:
+    - php -v
+    - composer test
+  artifacts:
+    paths:
+      - ./vendor/orchestra/testbench-core/laravel/database/deployment_scripts
+    expire_in: 1 days
+    when: on_failure
+
 sast:
-  stage: test
+  stage: preparation
+  artifacts:
+    paths:
+      - gl-sast-report.json
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
