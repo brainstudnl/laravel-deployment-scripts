@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create(config('deployment-scripts.table_name'), function (Blueprint $table) {
+            $table->id();
+            $table->string('deployment_script');
+            $table->integer('batch');
+            $table->timestamp('run_at')->useCurrent();
+        });
+    }
+
+    public function down()
+    {
+        Schema::drop(config('deployment-scripts.table_name'));
+    }
+};

@@ -1,0 +1,17 @@
+<?php
+
+use Brainstud\LaravelDeploymentScripts\DeploymentScript;
+
+return new class extends DeploymentScript {
+
+    public function up(): void
+    {
+
+    }
+
+    public function down(): void
+    {
+
+    }
+
+};
